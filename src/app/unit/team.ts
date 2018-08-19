@@ -5,8 +5,10 @@ export class Team {
     public name: string;
     public color: number;
     public spawners: Spawner[] = [];
+    public kills = 0;
 
-    constructor() {
+    constructor(name: string) {
         this.id = Math.random();
+        this.name = name;
     }
 }

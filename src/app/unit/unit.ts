@@ -1,8 +1,8 @@
-import { Drawable } from "./drawable";
-import { Gameboard } from "./gameboard";
-import { Projectile } from "./projectile";
-import { Team } from "./team";
-import { UnitTemplate } from "./unitTemplate";
+import { Drawable } from './drawable';
+import { Gameboard } from './gameboard';
+import { Projectile } from './projectile';
+import { Team } from './team';
+import { UnitTemplate } from './unitTemplate';
 
 export class Unit extends Drawable {
   public id: number;
@@ -11,8 +11,9 @@ export class Unit extends Drawable {
   public team: Team;
   public targetDistance: number;
   public currentHp: number;
-  public attackCooldown: number = 0;
-  public kills: number = 0;
+  public attackCooldown = 0;
+  public kills = 0;
+  public size: number;
   public readonly template: UnitTemplate;
 
   constructor(gameboard: Gameboard, team: Team, template: UnitTemplate) {
@@ -23,6 +24,7 @@ export class Unit extends Drawable {
     this.color = team.color;
     this.team = team;
     this.image = template.image;
+    this.size = template.size;
   }
 
   public move() {
@@ -30,12 +32,12 @@ export class Unit extends Drawable {
       return;
     }
 
-    if (this.targetDistance <= this.template.range) {
+    if (this.targetDistance <= this.template.range / 2) {
       return;
     }
-    let angle = 0.5 - Math.atan2(this.target.sprite.x - this.sprite.x, this.target.sprite.y - this.sprite.y);
-    let x = this.sprite.x + Math.cos(angle) * this.template.speed;
-    let y = this.sprite.y + Math.sin(angle) * this.template.speed;
+    const angle = Math.atan2(this.target.sprite.y - this.sprite.y, this.target.sprite.x - this.sprite.x);
+    const x = this.sprite.x + Math.cos(angle) * this.template.speed;
+    const y = this.sprite.y + Math.sin(angle) * this.template.speed;
     this.setPosition(x, y);
   }
 
@@ -47,14 +49,15 @@ export class Unit extends Drawable {
   public dodge(projectiles: Projectile[]) {
     let closest: Projectile;
     let closestDistance: number;
-    for (let projectile of projectiles) {
+    for (const projectile of projectiles) {
       if (projectile.shooter.id === this.id) {
         continue;
       }
       if (projectile.shooter.team.id === this.team.id) {
         continue;
       }
-      let distance = Math.hypot(this.sprite.x - projectile.sprite.x, this.sprite.y - projectile.sprite.y) - projectile.shooter.template.projectileSize;
+      const rawDistance = Math.hypot(this.sprite.x - projectile.sprite.x, this.sprite.y - projectile.sprite.y);
+      const distance = rawDistance - projectile.shooter.template.projectileSize;
       if (!closest) {
         closest = projectile;
         closestDistance = distance;
@@ -66,9 +69,9 @@ export class Unit extends Drawable {
     }
 
     if (!!closest && closestDistance < this.template.size * 3) {
-      let angle = 1 - Math.atan2(closest.sprite.x - this.sprite.x, closest.sprite.y - this.sprite.y);
-      let x = this.sprite.x - Math.cos(angle) * this.template.dodgeSpeed;
-      let y = this.sprite.y - Math.sin(angle) * this.template.dodgeSpeed;
+      const angle = Math.atan2(closest.sprite.y - this.sprite.y, closest.sprite.x - this.sprite.x);
+      const x = this.sprite.x - Math.cos(angle) * this.template.dodgeSpeed;
+      const y = this.sprite.y - Math.sin(angle) * this.template.dodgeSpeed;
       this.setPosition(x, y);
     }
   }
@@ -76,14 +79,14 @@ export class Unit extends Drawable {
   public findTarget(units: Unit[]) {
     let closest: Unit;
     let closestDistance: number;
-    for (let unit of units) {
+    for (const unit of units) {
       if (unit.id === this.id) {
         continue;
       }
       if (unit.team.id === this.team.id) {
         continue;
       }
-      let distance = Math.hypot(this.sprite.x - unit.sprite.x, this.sprite.y - unit.sprite.y);
+      const distance = Math.hypot(this.sprite.y - unit.sprite.y, this.sprite.x - unit.sprite.x);
       if (!closest) {
         closest = unit;
         closestDistance = distance;
@@ -108,9 +111,11 @@ export class Unit extends Drawable {
     if (this.attackCooldown <= 0) {
       this.attackCooldown = this.template.attackSpeed;
 
-      if (this.targetDistance <= this.template.range) {
-        let angle = 1 - Math.atan2(this.target.sprite.x - this.sprite.x, this.target.sprite.y - this.sprite.y);
-        let projectile = new Projectile(this, angle);
+      if (this.targetDistance <= this.template.range + this.target.template.size) {
+        const angle = Math.atan2(this.target.sprite.y - this.sprite.y, this.target.sprite.x - this.sprite.x);
+        const random = Math.random() > 0.5 ? 1 : -1;
+        const accuracyRoll = Math.random() * this.template.accuracy * random;
+        const projectile = new Projectile(this, angle + accuracyRoll);
         projectile.shooter = this;
         projectile.sprite.x = this.sprite.x;
         projectile.sprite.y = this.sprite.y;

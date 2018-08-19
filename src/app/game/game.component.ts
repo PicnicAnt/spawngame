@@ -17,7 +17,6 @@ export class GameComponent implements OnInit {
   }
 
   initializeGameboard() {
-    
     this.gameService.newMatch();
     console.log(this.gameService.currentMatch);
     this.gameboardElement.nativeElement.appendChild(this.gameService.currentMatch.gameboard.app.view);

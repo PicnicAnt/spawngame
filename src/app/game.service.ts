@@ -15,29 +15,31 @@ export class GameService {
   public loadMatch(id: number) {
     this.currentMatch = new Match();
 
-    let knight = new UnitTemplate();
-    knight.attackSpeed = 50;
+    const knight = new UnitTemplate();
+    knight.attackSpeed = 20;
     knight.damage = 50;
     knight.speed = 1;
-    knight.maxHp = 300;
+    knight.maxHp = 800;
     knight.image = 'monster.png';
     knight.name = 'Badass Knight';
     knight.dodgeSpeed = 0;
     knight.spawnSpeed = 2000;
+    knight.lifeLeech = 0.3;
 
-    let mage = new UnitTemplate();
+    const mage = new UnitTemplate();
     mage.attackSpeed = 5;
     mage.damage = 10;
     mage.speed = 0.5;
     mage.maxHp = 70;
     mage.range = 400;
     mage.image = 'monster-mage.png';
-    mage.name = 'Mage'
+    mage.name = 'Mage';
     mage.dodgeSpeed = 0.2;
     mage.spawnSpeed = 1500;
     mage.projectileSpeed = 2;
+    mage.accuracy = 0.5;
 
-    let spider = new UnitTemplate();
+    const spider = new UnitTemplate();
     spider.attackSpeed = 1;
     spider.damage = 20;
     spider.speed = 3;
@@ -46,9 +48,10 @@ export class GameService {
     spider.image = 'monster-spider.png';
     spider.name = 'Spider';
     spider.dodgeSpeed = 0.1;
-    spider.spawnSpeed = 100;
+    spider.spawnSpeed = 20;
+    spider.lifeLeech = 0.2;
 
-    let rabbit = new UnitTemplate();
+    const rabbit = new UnitTemplate();
     rabbit.speed = 5;
     rabbit.attackSpeed = 10;
     rabbit.damage = 100;
@@ -56,53 +59,75 @@ export class GameService {
     rabbit.range = 100;
     rabbit.image = 'monster-rabbit.png';
     rabbit.name = 'Killer Rabbit';
-    rabbit.dodgeSpeed = 0;
+    rabbit.dodgeSpeed = 3;
     rabbit.spawnSpeed = 5000;
+    rabbit.lifeLeech = 0.5;
 
-    let beetle = new UnitTemplate();
-    beetle.speed = 2;
+    const beetle = new UnitTemplate();
+    beetle.speed = 3;
     beetle.dodgeSpeed = 1.5;
-    beetle.damage = 2;
-    beetle.attackSpeed = 20;
-    beetle.range = 50;
+    beetle.damage = 5;
+    beetle.attackSpeed = 50;
+    beetle.range = 200;
     beetle.spawnSpeed = 10;
     beetle.maxHp = 10;
     beetle.name = 'Beetle';
     beetle.image = 'monster-beetle.png';
+    beetle.accuracy = 0.8;
+    beetle.projectileSpeed = 10;
+    beetle.lifeLeech = 0.1;
 
-    let knightSpawner = new SpawnerTemplate(knight);
-    let mageSpawner = new SpawnerTemplate(mage);
-    let spiderSpawner = new SpawnerTemplate(spider);
-    let rabbitSpawner = new SpawnerTemplate(rabbit);
-    let beetleSpawner = new SpawnerTemplate(beetle);
+    const archer = new UnitTemplate();
+    archer.speed = 1;
+    archer.dodgeSpeed = 3;
+    archer.range = 2000;
+    archer.spawnSpeed = 500;
+    archer.projectileSpeed = 100;
+    archer.damage = 50;
+    archer.attackSpeed = 20;
+    archer.name = 'Archer';
+    archer.image = 'monster-archer.png';
+    archer.accuracy = 0.01;
+    archer.maxHp = 60;
 
-    let team1 = new Team();
+    const knightSpawner = new SpawnerTemplate(knight);
+    const mageSpawner = new SpawnerTemplate(mage);
+    const spiderSpawner = new SpawnerTemplate(spider);
+    const rabbitSpawner = new SpawnerTemplate(rabbit);
+    const beetleSpawner = new SpawnerTemplate(beetle);
+    const archerSpawner = new SpawnerTemplate(archer);
+
+    const team1 = new Team();
     team1.color = 0xff0000;
     team1.spawners.push(new Spawner(this.currentMatch.gameboard, team1, beetleSpawner, 20, 20));
     team1.spawners.push(new Spawner(this.currentMatch.gameboard, team1, knightSpawner, 20, 50));
     team1.spawners.push(new Spawner(this.currentMatch.gameboard, team1, rabbitSpawner, 50, 20));
 
-    let team2 = new Team();
+    const team2 = new Team();
     team2.color = 0x00ff00;
     team2.spawners.push(new Spawner(this.currentMatch.gameboard, team2, mageSpawner, 780, 20));
     team2.spawners.push(new Spawner(this.currentMatch.gameboard, team2, spiderSpawner, 750, 20));
     team2.spawners.push(new Spawner(this.currentMatch.gameboard, team2, spiderSpawner, 780, 50));
 
-    let team3 = new Team();
+    const team3 = new Team();
     team3.color = 0x6600ff;
     team3.spawners.push(new Spawner(this.currentMatch.gameboard, team3, spiderSpawner, 780, 580));
     team3.spawners.push(new Spawner(this.currentMatch.gameboard, team3, spiderSpawner, 780, 550));
     team3.spawners.push(new Spawner(this.currentMatch.gameboard, team3, spiderSpawner, 750, 580));
 
-    let team4 = new Team();
+    const team4 = new Team();
     team4.color = 0x0033ff;
     team4.spawners.push(new Spawner(this.currentMatch.gameboard, team4, mageSpawner, 20, 580));
-    team4.spawners.push(new Spawner(this.currentMatch.gameboard, team4, knightSpawner, 20, 550));
+    team4.spawners.push(new Spawner(this.currentMatch.gameboard, team4, spiderSpawner, 20, 550));
     team4.spawners.push(new Spawner(this.currentMatch.gameboard, team4, rabbitSpawner, 50, 580));
 
-    let team5 = new Team();
+    const team5 = new Team();
     team5.color = 0xffffff;
-    team5.spawners.push(new Spawner(this.currentMatch.gameboard, team5, beetleSpawner, 400, 300));
+    team5.spawners.push(new Spawner(this.currentMatch.gameboard, team5, beetleSpawner, 370, 270));
+    team5.spawners.push(new Spawner(this.currentMatch.gameboard, team5, beetleSpawner, 430, 330));
+    team5.spawners.push(new Spawner(this.currentMatch.gameboard, team5, archerSpawner, 400, 300));
+    team5.spawners.push(new Spawner(this.currentMatch.gameboard, team5, beetleSpawner, 370, 330));
+    team5.spawners.push(new Spawner(this.currentMatch.gameboard, team5, beetleSpawner, 430, 270));
 
     this.currentMatch.teams.push(team1, team2, team3, team4, team5);
   }

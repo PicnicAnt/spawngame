@@ -26,21 +26,22 @@ export class Projectile extends Drawable {
     }
 
     public hit(units: Unit[]) {
-        for (let unit of units) {
+        for (const unit of units) {
             if (unit.id === this.shooter.id) {
                 continue;
             }
             if (unit.team.id === this.shooter.team.id) {
                 continue;
             }
-            let distance = Math.hypot(this.sprite.x - unit.sprite.x, this.sprite.y - unit.sprite.y);
-            if (distance <= this.shooter.template.projectileSize) {
-                console.log(distance);
-                let isKill = unit.hit(this);
+            const distance = Math.hypot(this.sprite.x - unit.sprite.x, this.sprite.y - unit.sprite.y);
+            if (distance <= this.shooter.template.projectileSize + unit.size / 2) {
+                const isKill = unit.hit(this);
+                this.shooter.currentHp += this.shooter.template.damage * this.shooter.template.lifeLeech;
                 if (isKill) {
                     ++this.shooter.kills;
-                    this.shooter.currentHp += unit.template.maxHp * 0.01;
+                    ++this.shooter.team.kills;
                     this.shooter.sprite.scale.set(this.shooter.currentHp / this.shooter.template.maxHp);
+                    this.shooter.size *= this.shooter.currentHp / this.shooter.template.maxHp;
                 }
                 this.impact(unit);
             }
