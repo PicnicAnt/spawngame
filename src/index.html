@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>Pixi</title>
@@ -7,8 +8,26 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <script src="https://www.gstatic.com/firebasejs/5.4.0/firebase.js"></script>
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyBIbED7Y8rAdESKNz6GXOlYbusAFEvn6Lg",
+      authDomain: "spawngame-picnic.firebaseapp.com",
+      databaseURL: "https://spawngame-picnic.firebaseio.com",
+      projectId: "spawngame-picnic",
+      storageBucket: "",
+      messagingSenderId: "273612194813"
+    };
+    firebase.initializeApp(config);
+  </script>
+  <script src="/__/firebase/5.3.0/firebase-app.js"></script>
+  <script src="/__/firebase/init.js"></script>
 </head>
+
 <body>
   <app-root></app-root>
 </body>
+
 </html>

@@ -1,0 +1,23 @@
+<div>
+  <div #gameboard>
+
+  </div>
+  <table>
+    <tr>
+      <th>Units</th>
+      <td>{{this.gameService.currentMatch.gameboard.units.length}}</td>
+    </tr>
+    <tr>
+      <th>Projectiles</th>
+      <td>{{this.gameService.currentMatch.gameboard.projectiles.length}}</td>
+    </tr>
+  </table>
+  <table>
+    <tr *ngFor="let unit of gameService.currentMatch.gameboard.units">
+      <td><img src='assets/images/{{unit.image}}' /></td>
+      <th>{{unit.template.name}}</th>
+      <td>{{unit.kills}}</td>
+      <td>{{unit.currentHp.toFixed(2)}}</td>
+    </tr>
+  </table>
+</div>
