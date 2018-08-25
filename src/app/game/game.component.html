@@ -2,6 +2,7 @@
   <div #gameboard>
 
   </div>
+  <button (click)="onPlayPause()">{{gameService.currentMatch.paused ? 'Play' : 'Pause'}}</button>
   <table>
     <tr>
       <th>Units</th>
@@ -13,11 +14,17 @@
     </tr>
   </table>
   <table>
+    <tr *ngFor="let team of gameService.currentMatch.teams">
+      <th>{{team.name}}</th>
+      <th>{{team.kills}}</th>
+    </tr>
+  </table>
+  <!-- <table>
     <tr *ngFor="let unit of gameService.currentMatch.gameboard.units">
       <td><img src='assets/images/{{unit.image}}' /></td>
       <th>{{unit.template.name}}</th>
       <td>{{unit.kills}}</td>
       <td>{{unit.currentHp.toFixed(2)}}</td>
     </tr>
-  </table>
+  </table> -->
 </div>

@@ -22,4 +22,13 @@ export class GameComponent implements OnInit {
     this.gameboardElement.nativeElement.appendChild(this.gameService.currentMatch.gameboard.app.view);
     this.gameService.currentMatch.start();
   }
+
+  onPlayPause() {
+    if (this.gameService.currentMatch.paused) {
+      this.gameService.currentMatch.play();
+    }
+    else {
+      this.gameService.currentMatch.pause();
+    }
+  }
 }

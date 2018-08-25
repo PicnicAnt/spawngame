@@ -1,7 +1,7 @@
-import { Spawner } from "./spawner";
-import { Unit } from "./unit";
-import { Projectile } from "./projectile";
-import { Team } from "./team";
+import { Spawner } from './spawner';
+import { Unit } from './unit';
+import { Projectile } from './projectile';
+import { Team } from './team';
 
 export class Gameboard {
   public spawners: Spawner[] = [];
@@ -9,7 +9,7 @@ export class Gameboard {
   public projectiles: Projectile[] = [];
   public teams: { [id: number]: Team } = [];
   public app: PIXI.Application;
-  public ticks: number = 0;
+  public ticks = 0;
 
   constructor() {
     this.app = new PIXI.Application(800, 600);
@@ -24,7 +24,7 @@ export class Gameboard {
     this.units.push(unit);
     this.app.stage.addChild(unit.sprite);
   }
-  
+
   public removeUnit(unit: Unit) {
     this.app.stage.removeChild(unit.sprite);
     this.units = this.units.filter(u => u.id !== unit.id);
@@ -39,15 +39,22 @@ export class Gameboard {
     this.app.stage.removeChild(projectile.sprite);
     this.projectiles = this.projectiles.filter(p => p.id !== projectile.id);
   }
-  
-  public onGameTick(delta: number) {
-    this.ticks += 1;
+
+  public onGameTick(delta: number, paused: boolean) {
+    if (paused) {
+      return;
+    }
+    ++this.ticks;
     this.spawners.forEach(s => s.spawn());
     this.units.forEach(u => {
       u.findTarget(this.units);
       u.move();
       u.dodge(this.projectiles);
-      u.shoot(u.target);
+
+      u.attacks.forEach(a => {
+        a.findTarget(this.units);
+        a.shoot(a.target);
+      });
     });
     this.projectiles.forEach(p => {
       p.move();
@@ -56,8 +63,8 @@ export class Gameboard {
         p.sprite.y < 0 ||
         p.sprite.x > this.app.renderer.width ||
         p.sprite.y > this.app.renderer.height) {
-          this.removeProjectile(p);
-        }
+        this.removeProjectile(p);
+      }
     });
   }
 }

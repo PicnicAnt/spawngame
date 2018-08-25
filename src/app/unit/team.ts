@@ -1,4 +1,4 @@
-import { Spawner } from "./spawner";
+import { Spawner } from './spawner';
 
 export class Team {
     public id: number;

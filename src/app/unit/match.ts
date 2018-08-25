@@ -4,6 +4,7 @@ import { Gameboard } from "./gameboard";
 export class Match {
     public teams: Team[] = [];
     public gameboard: Gameboard;
+    public paused = true;
 
     constructor() {
         this.gameboard = new Gameboard();
@@ -18,7 +19,17 @@ export class Match {
                 this.gameboard.addSpawner(spawner);
             }
         }
-        
-        this.gameboard.app.ticker.add((delta: number) => this.gameboard.onGameTick(delta));
+
+        this.gameboard.app.ticker.add((delta: number) => this.gameboard.onGameTick(delta, this.paused));
+        this.play();
+
+    }
+
+    public play() {
+        this.paused = false;
+    }
+
+    public pause() {
+        this.paused = true;
     }
 }

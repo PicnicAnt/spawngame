@@ -1,11 +1,12 @@
-import { Gameboard } from "./gameboard";
+import { Gameboard } from './gameboard';
 
-declare var PIXI: any;
+const IMAGE_SIZE = 32;
 
 export abstract class Drawable {
     public image: string;
     public gameboard: Gameboard;
-    public color: number = 0xffffff;
+    public color = 0xffffff;
+    public radius = 16;
 
     private _sprite: PIXI.Sprite;
     get sprite(): PIXI.Sprite {
@@ -13,6 +14,7 @@ export abstract class Drawable {
             this._sprite = PIXI.Sprite.fromImage(`assets/images/${this.image}`);
             this._sprite.anchor.set(0.5);
             this._sprite.tint = this.color;
+            this._sprite.scale.set((this.radius * 2) / IMAGE_SIZE);
         }
         return this._sprite;
     }

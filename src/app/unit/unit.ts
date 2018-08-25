@@ -3,6 +3,7 @@ import { Gameboard } from './gameboard';
 import { Projectile } from './projectile';
 import { Team } from './team';
 import { UnitTemplate } from './unitTemplate';
+import { Attack } from './attack';
 
 export class Unit extends Drawable {
   public id: number;
@@ -13,8 +14,9 @@ export class Unit extends Drawable {
   public currentHp: number;
   public attackCooldown = 0;
   public kills = 0;
-  public size: number;
+  public radius: number;
   public readonly template: UnitTemplate;
+  public attacks: Attack[] = [];
 
   constructor(gameboard: Gameboard, team: Team, template: UnitTemplate) {
     super(gameboard, template.image, team.color);
@@ -24,7 +26,12 @@ export class Unit extends Drawable {
     this.color = team.color;
     this.team = team;
     this.image = template.image;
-    this.size = template.size;
+    this.radius = template.radius;
+
+    for (const projectileTemplate of template.attacks) {
+      const attack = new Attack(projectileTemplate, this);
+      this.attacks.push(attack);
+    }
   }
 
   public move() {
@@ -32,13 +39,21 @@ export class Unit extends Drawable {
       return;
     }
 
-    if (this.targetDistance <= this.template.range / 2) {
+    if (this.targetDistance <= this.template.maxRange &&
+      this.targetDistance >= this.template.minRange) {
       return;
     }
+
     const angle = Math.atan2(this.target.sprite.y - this.sprite.y, this.target.sprite.x - this.sprite.x);
-    const x = this.sprite.x + Math.cos(angle) * this.template.speed;
-    const y = this.sprite.y + Math.sin(angle) * this.template.speed;
-    this.setPosition(x, y);
+    let offsetX = Math.cos(angle) * this.template.speed;
+    let offsetY = Math.sin(angle) * this.template.speed;
+
+    if (this.targetDistance <= this.template.minRange) {
+      offsetX *= -1;
+      offsetY *= -1;
+    }
+
+    this.setPosition(this.sprite.x + offsetX, this.sprite.y + offsetY);
   }
 
   public setPosition(x: number, y: number) {
@@ -50,14 +65,14 @@ export class Unit extends Drawable {
     let closest: Projectile;
     let closestDistance: number;
     for (const projectile of projectiles) {
-      if (projectile.shooter.id === this.id) {
+      if (projectile.attack.owner.id === this.id) {
         continue;
       }
-      if (projectile.shooter.team.id === this.team.id) {
+      if (projectile.attack.owner.team.id === this.team.id) {
         continue;
       }
       const rawDistance = Math.hypot(this.sprite.x - projectile.sprite.x, this.sprite.y - projectile.sprite.y);
-      const distance = rawDistance - projectile.shooter.template.projectileSize;
+      const distance = rawDistance - projectile.attack.template.radius;
       if (!closest) {
         closest = projectile;
         closestDistance = distance;
@@ -68,7 +83,7 @@ export class Unit extends Drawable {
       }
     }
 
-    if (!!closest && closestDistance < this.template.size * 3) {
+    if (!!closest && closestDistance < this.template.radius * 3) {
       const angle = Math.atan2(closest.sprite.y - this.sprite.y, closest.sprite.x - this.sprite.x);
       const x = this.sprite.x - Math.cos(angle) * this.template.dodgeSpeed;
       const y = this.sprite.y - Math.sin(angle) * this.template.dodgeSpeed;
@@ -100,36 +115,12 @@ export class Unit extends Drawable {
     this.targetDistance = closestDistance;
   }
 
-  public shoot(target: Unit) {
-    if (!target) {
-      return;
-    }
-
-    if (this.attackCooldown > 0) {
-      --this.attackCooldown;
-    }
-    if (this.attackCooldown <= 0) {
-      this.attackCooldown = this.template.attackSpeed;
-
-      if (this.targetDistance <= this.template.range + this.target.template.size) {
-        const angle = Math.atan2(this.target.sprite.y - this.sprite.y, this.target.sprite.x - this.sprite.x);
-        const random = Math.random() > 0.5 ? 1 : -1;
-        const accuracyRoll = Math.random() * this.template.accuracy * random;
-        const projectile = new Projectile(this, angle + accuracyRoll);
-        projectile.shooter = this;
-        projectile.sprite.x = this.sprite.x;
-        projectile.sprite.y = this.sprite.y;
-        this.gameboard.addProjective(projectile);
-      }
-    }
-  }
-
   public die() {
     this.gameboard.removeUnit(this);
   }
 
   public hit(projectile: Projectile): boolean {
-    this.currentHp -= projectile.shooter.template.damage;
+    this.currentHp -= projectile.attack.template.damage;
     if (this.currentHp <= 0) {
       this.die();
       return true;
