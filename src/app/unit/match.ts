@@ -1,13 +1,14 @@
 import { Team } from "./team";
 import { Gameboard } from "./gameboard";
+import { GameMap } from "./map";
 
 export class Match {
     public teams: Team[] = [];
     public gameboard: Gameboard;
     public paused = true;
 
-    constructor() {
-        this.gameboard = new Gameboard();
+    constructor(map: GameMap) {
+        this.gameboard = new Gameboard(map);
     }
 
     public start() {

@@ -6,7 +6,6 @@ export class Attack {
     attackCooldown = 0;
     template: ProjectileTemplate;
     target: Unit;
-    targetDistance: number;
     owner: Unit;
 
     constructor(template: ProjectileTemplate, owner: Unit) {
@@ -14,7 +13,7 @@ export class Attack {
         this.owner = owner;
     }
 
-    public findTarget(units: Unit[]) {
+    public findTarget(units: Unit[]): Unit {
         let closest: Unit;
         let closestDistance: number;
         for (const unit of units) {
@@ -34,29 +33,36 @@ export class Attack {
             closestDistance = distance;
           }
         }
-        this.target = closest;
-        this.targetDistance = closestDistance;
+        
+        return closest;
       }
 
-    public shoot(target: Unit) {
-        if (!target) {
-            return;
-        }
-
+    public shoot() {
         if (this.attackCooldown > 0) {
             --this.attackCooldown;
         }
+
         if (this.attackCooldown <= 0) {
             this.attackCooldown = this.template.attackSpeed;
 
-            if (this.targetDistance <= this.template.maxRange + this.target.template.radius &&
-                this.targetDistance >= this.template.minRange + this.target.template.radius) {
-
-                const angle = Math.atan2(this.target.sprite.y - this.owner.sprite.y, this.target.sprite.x - this.owner.sprite.x);
+            const target = this.findTarget(this.owner.gameboard.units);
+            
+            if (!target) {
+                return;
+            }
+    
+            const distance = Math.hypot(this.owner.sprite.y - target.sprite.y, this.owner.sprite.x - target.sprite.x);
+    
+            if (distance <= this.template.maxRange + target.template.radius &&
+                distance >= this.template.minRange + target.template.radius) {
+    
+                const angle = Math.atan2(
+                    target.sprite.y - this.owner.sprite.y, 
+                    target.sprite.x - this.owner.sprite.x);
                 const random = Math.random() > 0.5 ? 1 : -1;
                 const accuracyRoll = Math.random() * this.template.accuracy * random;
-                const projectile = new Projectile(this, angle + accuracyRoll);
-                this.owner.gameboard.addProjective(projectile);
+                const projectile = new Projectile(this.owner, this, angle + accuracyRoll);
+                this.owner.gameboard.addProjectile(projectile);
             }
         }
     }

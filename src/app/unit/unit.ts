@@ -10,7 +10,6 @@ export class Unit extends Drawable {
   public direction: number;
   public target: Unit;
   public team: Team;
-  public targetDistance: number;
   public currentHp: number;
   public attackCooldown = 0;
   public kills = 0;
@@ -35,12 +34,16 @@ export class Unit extends Drawable {
   }
 
   public move() {
+    this.target = this.findTarget(this.gameboard.units);
+
     if (!this.target) {
       return;
     }
 
-    if (this.targetDistance <= this.template.maxRange &&
-      this.targetDistance >= this.template.minRange) {
+    const distance = Math.hypot(this.sprite.y - this.target.sprite.y, this.sprite.x - this.target.sprite.x);
+
+    if (distance <= this.template.maxRange &&
+      distance >= this.template.minRange) {
       return;
     }
 
@@ -48,7 +51,7 @@ export class Unit extends Drawable {
     let offsetX = Math.cos(angle) * this.template.speed;
     let offsetY = Math.sin(angle) * this.template.speed;
 
-    if (this.targetDistance <= this.template.minRange) {
+    if (distance <= this.template.minRange) {
       offsetX *= -1;
       offsetY *= -1;
     }
@@ -57,8 +60,8 @@ export class Unit extends Drawable {
   }
 
   public setPosition(x: number, y: number) {
-    this.sprite.x = x < 0 ? 0 : x > this.gameboard.app.renderer.width ? this.gameboard.app.renderer.width : x;
-    this.sprite.y = y < 0 ? 0 : y > this.gameboard.app.renderer.height ? this.gameboard.app.renderer.height : y;
+    this.sprite.x = x < 0 ? 0 : x > this.gameboard.map.x ? this.gameboard.map.x : x;
+    this.sprite.y = y < 0 ? 0 : y > this.gameboard.map.y ? this.gameboard.map.y : y;
   }
 
   public dodge(projectiles: Projectile[]) {
@@ -91,7 +94,7 @@ export class Unit extends Drawable {
     }
   }
 
-  public findTarget(units: Unit[]) {
+  public findTarget(units: Unit[]): Unit {
     let closest: Unit;
     let closestDistance: number;
     for (const unit of units) {
@@ -111,8 +114,8 @@ export class Unit extends Drawable {
         closestDistance = distance;
       }
     }
-    this.target = closest;
-    this.targetDistance = closestDistance;
+
+    return closest;
   }
 
   public die() {
@@ -121,6 +124,7 @@ export class Unit extends Drawable {
 
   public hit(projectile: Projectile): boolean {
     this.currentHp -= projectile.attack.template.damage;
+
     if (this.currentHp <= 0) {
       this.die();
       return true;

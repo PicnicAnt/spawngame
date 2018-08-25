@@ -2,6 +2,7 @@ import { Spawner } from './spawner';
 import { Unit } from './unit';
 import { Projectile } from './projectile';
 import { Team } from './team';
+import { GameMap } from './map';
 
 export class Gameboard {
   public spawners: Spawner[] = [];
@@ -10,9 +11,16 @@ export class Gameboard {
   public teams: { [id: number]: Team } = [];
   public app: PIXI.Application;
   public ticks = 0;
+  public map: GameMap;
 
-  constructor() {
-    this.app = new PIXI.Application(800, 600);
+  constructor(map: GameMap) {
+    this.map = map;
+    this.app = new PIXI.Application(map.x, map.y, { backgroundColor: map.backgroundColor });
+
+    // const sprite = PIXI.Sprite.fromImage(`assets/images/${map.backgroundImage}`);
+    // sprite.x = 0;
+    // sprite.y = 0;
+    // this.app.stage.addChild(sprite);
   }
 
   public addSpawner(spawner: Spawner) {
@@ -30,7 +38,7 @@ export class Gameboard {
     this.units = this.units.filter(u => u.id !== unit.id);
   }
 
-  public addProjective(projectile: Projectile) {
+  public addProjectile(projectile: Projectile) {
     this.projectiles.push(projectile);
     this.app.stage.addChild(projectile.sprite);
   }
@@ -47,13 +55,11 @@ export class Gameboard {
     ++this.ticks;
     this.spawners.forEach(s => s.spawn());
     this.units.forEach(u => {
-      u.findTarget(this.units);
       u.move();
       u.dodge(this.projectiles);
 
       u.attacks.forEach(a => {
-        a.findTarget(this.units);
-        a.shoot(a.target);
+        a.shoot();
       });
     });
     this.projectiles.forEach(p => {
